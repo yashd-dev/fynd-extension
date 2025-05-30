@@ -105,10 +105,9 @@ const Colors: React.FC<ColorsProps> = ({
       <div className="mb-8">
         <h3 className="text-sm font-medium text-gray-700 mb-2">Base Image</h3>
         <div className="relative w-32 h-32">
-          <Image
+          <img
             src={baseImage}
             alt="Base product"
-            fill
             className="object-cover rounded-lg border border-gray-200"
           />
         </div>

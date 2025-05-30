@@ -493,10 +493,9 @@ const ProductCreationFlow = () => {
                     >
                       <div className="relative w-16 h-16 flex-shrink-0">
                         {product.image ? (
-                          <Image
+                          <img
                             src={product.image}
                             alt={product.name}
-                            fill
                             className="object-cover rounded-md"
                           />
                         ) : (
