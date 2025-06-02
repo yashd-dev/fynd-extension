@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import LoadingAnimation from "./LoadingAnimation";
+import axios from "axios";
 
 interface Product {
   id: string;
@@ -15,6 +16,8 @@ interface ColorVariant {
   hexCode: string;
   image: string;
   isApproved: boolean;
+  generatedText?: string;
+  generatedImageBase64?: string;
 }
 
 export interface ManagerProps {
@@ -45,20 +48,61 @@ const Manager: React.FC<ManagerProps> = ({
   const handleAddColor = async () => {
     setIsLoading(true);
     try {
-      // Here you would make the API call to your backend
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Convert product image to blob and file
+      const imageResponse = await fetch(product.image);
+      const imageBlob = await imageResponse.blob();
+      const file = new File([imageBlob], "product-image.png", { type: imageBlob.type });
 
-      // Simulate backend response with the generated image
+      // 1. Upload image first
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadRes = await axios.post("/api/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const uploadedUrl = uploadRes.data.assetUrl || uploadRes.data.url;
+      console.log("Uploaded URL:", uploadedUrl);
+
+      if (!uploadedUrl) {
+        throw new Error("Image URL not returned from server");
+      }
+
+      // 2. Generate variant for the selected color
+      const generateFormData = new FormData();
+
+      // Fetch the image from uploadedUrl to get a File object again
+      const uploadedImageResponse = await fetch(uploadedUrl);
+      const uploadedImageBlob = await uploadedImageResponse.blob();
+      const uploadedImageFile = new File([uploadedImageBlob], "uploaded-product.png", { type: uploadedImageBlob.type });
+
+      generateFormData.append("file", uploadedImageFile);
+      generateFormData.append(
+        "prompt",
+        `change the color of the article to ${newColor} make sure you only change the color of the article do not change the background at all`
+      );
+
+      const generateRes = await axios.post("/api/generate", generateFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      console.log(`Generate response for color ${newColor}:`, generateRes.data);
+
+      const { text, imageBase64 } = generateRes.data;
+
       const newVariant: ColorVariant = {
         hexCode: newColor,
-        image: product.image, // In reality, this would be the URL returned from your backend
+        image: uploadedUrl,
         isApproved: false,
+        generatedText: text,
+        generatedImageBase64: imageBase64,
       };
 
       setGeneratedVariants((prev) => [...prev, newVariant]);
       setNewColor("#000000"); // Reset color picker
     } catch (error) {
       console.error("Error generating color variant:", error);
+      alert("Failed to generate color variant. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +138,7 @@ const Manager: React.FC<ManagerProps> = ({
           <div className="w-16 h-16 flex-shrink-0">
             {product.image ? (
               <img
-                src={product.image}
+                src={product.image || "/placeholder.svg"}
                 alt={product.name}
                 className="w-full h-full object-cover rounded-md"
               />
@@ -219,7 +263,7 @@ const Manager: React.FC<ManagerProps> = ({
                   <div className="aspect-square w-full">
                     {variant.image ? (
                       <img
-                        src={variant.image}
+                        src={variant.image || "/placeholder.svg"}
                         alt={`${product.name} in ${variant.hexCode}`}
                         className="w-full h-full object-cover rounded-md"
                       />
@@ -279,7 +323,7 @@ const Manager: React.FC<ManagerProps> = ({
                   <div className="aspect-square w-full">
                     {variant.image ? (
                       <img
-                        src={variant.image}
+                        src={variant.image || "/placeholder.svg"}
                         alt={`${product.name} in ${variant.hexCode}`}
                         className="w-full h-full object-cover rounded-md"
                       />
@@ -315,11 +359,10 @@ const Manager: React.FC<ManagerProps> = ({
         <button
           onClick={onNext}
           disabled={selectedVariants.length === 0 || isLoading}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-            selectedVariants.length > 0 && !isLoading
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${selectedVariants.length > 0 && !isLoading
               ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          }`}
+            }`}
         >
           <span>Next</span>
           <ChevronRight className="w-5 h-5" />

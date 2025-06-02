@@ -1,12 +1,23 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { Check, X, RefreshCw } from "lucide-react";
+import { Check, X, RefreshCw } from 'lucide-react';
 import Image from "next/image";
+import axios from "axios";
 
 interface ColorsProps {
   baseImage: string;
-  variants: { hexCode: string; image: string }[];
-  onChange: (variants: { hexCode: string; image: string }[]) => void;
+  variants: {
+    hexCode: string;
+    image: string;
+    generatedText?: string;
+    generatedImageBase64?: string;
+  }[];
+  onChange: (variants: {
+    hexCode: string;
+    image: string;
+    generatedText?: string;
+    generatedImageBase64?: string;
+  }[]) => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -20,25 +31,91 @@ const Colors: React.FC<ColorsProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedVariants, setGeneratedVariants] = useState<
-    { hexCode: string; image: string }[]
+    {
+      hexCode: string;
+      image: string;
+      generatedText?: string;
+      generatedImageBase64?: string;
+    }[]
   >([]);
   const [approvedVariants, setApprovedVariants] = useState<
-    { hexCode: string; image: string }[]
+    {
+      hexCode: string;
+      image: string;
+      generatedText?: string;
+      generatedImageBase64?: string;
+    }[]
   >([]);
 
   const generateVariants = useCallback(async () => {
     setIsLoading(true);
-    // Simulate API call to generate variants
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Convert base64 image data URL to blob and file
+      const blob = await (await fetch(baseImage)).blob();
+      const file = new File([blob], "product-image.png", { type: blob.type });
 
-    // Generate variants based on selected colors
-    const newVariants = variants.map((variant) => ({
-      hexCode: variant.hexCode,
-      image: baseImage, // In real implementation, this would be the AI-generated image
-    }));
+      // 1. Upload image first
+      const formData = new FormData();
+      formData.append("file", file);
 
-    setGeneratedVariants(newVariants);
-    setIsLoading(false);
+      const uploadRes = await axios.post("/api/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const uploadedUrl = uploadRes.data.assetUrl || uploadRes.data.url;
+      console.log("Uploaded URL:", uploadedUrl);
+
+      if (!uploadedUrl) {
+        throw new Error("Image URL not returned from server");
+      }
+
+      // 2. Generate variants for all selected colors
+      const newVariants = [];
+
+      for (const variant of variants) {
+        try {
+          const generateFormData = new FormData();
+
+          // Fetch the image from uploadedUrl to get a File object again
+          const imageResponse = await fetch(uploadedUrl);
+          const imageBlob = await imageResponse.blob();
+          const imageFile = new File([imageBlob], "uploaded-product.png", { type: imageBlob.type });
+
+          generateFormData.append("file", imageFile);
+          generateFormData.append(
+            "prompt",
+            `change the color of the article to ${variant.hexCode} make sure you only change the color of the article do not change the background at all`
+          );
+
+          const generateRes = await axios.post("/api/generate", generateFormData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          console.log(`Generate response for color ${variant.hexCode}:`, generateRes.data);
+
+          const { text, imageBase64 } = generateRes.data;
+
+          newVariants.push({
+            hexCode: variant.hexCode,
+            image: uploadedUrl,
+            generatedText: text,
+            generatedImageBase64: imageBase64,
+          });
+
+          console.log(`Generated variant for color ${variant.hexCode}`);
+        } catch (error) {
+          console.error(`Failed to generate variant for color ${variant.hexCode}:`, error);
+          // Continue with other colors even if one fails
+        }
+      }
+
+      setGeneratedVariants(newVariants);
+    } catch (error) {
+      console.error("Upload or generate failed:", error);
+      alert("Image upload or generation failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [variants, baseImage]);
 
   useEffect(() => {
@@ -50,6 +127,8 @@ const Colors: React.FC<ColorsProps> = ({
   const handleApproveVariant = (variant: {
     hexCode: string;
     image: string;
+    generatedText?: string;
+    generatedImageBase64?: string;
   }) => {
     setApprovedVariants((prev) => [...prev, variant]);
     setGeneratedVariants((prev) =>
@@ -57,7 +136,10 @@ const Colors: React.FC<ColorsProps> = ({
     );
   };
 
-  const handleRejectVariant = (variant: { hexCode: string; image: string }) => {
+  const handleRejectVariant = (variant: {
+    hexCode: string; image: string; generatedText?: string;
+    generatedImageBase64?: string;
+  }) => {
     setGeneratedVariants((prev) =>
       prev.filter((v) => v.hexCode !== variant.hexCode)
     );
@@ -106,7 +188,7 @@ const Colors: React.FC<ColorsProps> = ({
         <h3 className="text-sm font-medium text-gray-700 mb-2">Base Image</h3>
         <div className="relative w-32 h-32">
           <img
-            src={baseImage}
+            src={baseImage || "/placeholder.svg"}
             alt="Base product"
             className="object-cover rounded-lg border border-gray-200"
           />
@@ -152,7 +234,7 @@ const Colors: React.FC<ColorsProps> = ({
                 </div>
                 <div className="relative w-full h-48">
                   <Image
-                    src={variant.image}
+                    src={variant.image || "/placeholder.svg"}
                     alt={`Variant ${variant.hexCode}`}
                     fill
                     className="object-cover rounded-lg"
@@ -188,7 +270,7 @@ const Colors: React.FC<ColorsProps> = ({
                 </div>
                 <div className="relative w-full h-48">
                   <Image
-                    src={variant.image}
+                    src={variant.image || "/placeholder.svg"}
                     alt={`Variant ${variant.hexCode}`}
                     fill
                     className="object-cover rounded-lg"
@@ -222,11 +304,10 @@ const Colors: React.FC<ColorsProps> = ({
           <button
             onClick={handleNext}
             disabled={approvedVariants.length === 0}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-              approvedVariants.length > 0
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${approvedVariants.length > 0
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             <span>Next</span>
           </button>

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Details from "./details";
 import Colors from "./colors";
 import Preview from "./preview";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Manager from "./manager";
 import Image from "next/image";
 
@@ -15,6 +15,8 @@ export interface ProductData {
   colorVariants: {
     hexCode: string;
     image: string;
+    generatedText?: string;
+    generatedImageBase64?: string;
   }[];
   selectedChannels: string[];
   selectedProduct?: string;
@@ -329,11 +331,10 @@ const ProductCreationFlow = () => {
             {INDIAN_CHANNELS.map((channel, index) => (
               <div
                 key={channel.id}
-                className={`bg-white rounded-lg border ${
-                  productData.selectedChannels.includes(channel.id)
+                className={`bg-white rounded-lg border ${productData.selectedChannels.includes(channel.id)
                     ? "border-blue-500 ring-2 ring-blue-200"
                     : "border-gray-200"
-                } p-6 hover:shadow-md transition-shadow relative cursor-pointer`}
+                  } p-6 hover:shadow-md transition-shadow relative cursor-pointer`}
                 onClick={() => {
                   setProductData((prev) => ({
                     ...prev,
@@ -433,7 +434,7 @@ const ProductCreationFlow = () => {
         const selectedChannel = productData.selectedChannels[0];
         const channelProducts =
           EXISTING_PRODUCTS[
-            selectedChannel as keyof typeof EXISTING_PRODUCTS
+          selectedChannel as keyof typeof EXISTING_PRODUCTS
           ] || [];
 
         if (productData.selectedProduct) {
@@ -475,11 +476,10 @@ const ProductCreationFlow = () => {
                   {channelProducts.map((product) => (
                     <div
                       key={product.id}
-                      className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        productData.selectedProduct === product.id
+                      className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${productData.selectedProduct === product.id
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-200"
-                      }`}
+                        }`}
                       onClick={() => {
                         setProductData((prev) => ({
                           ...prev,
@@ -494,7 +494,7 @@ const ProductCreationFlow = () => {
                       <div className="relative w-16 h-16 flex-shrink-0">
                         {product.image ? (
                           <img
-                            src={product.image}
+                            src={product.image || "/placeholder.svg"}
                             alt={product.name}
                             className="object-cover rounded-md"
                           />
@@ -596,23 +596,23 @@ const ProductCreationFlow = () => {
             {currentStep === "channel-select"
               ? "Select Sales Channel"
               : currentStep === "product-choice"
-              ? "Choose Product Option"
-              : currentStep === "upload"
-              ? "Upload Product"
-              : currentStep === "create"
-              ? "Create New Product"
-              : "Preview Product"}
+                ? "Choose Product Option"
+                : currentStep === "upload"
+                  ? "Upload Product"
+                  : currentStep === "create"
+                    ? "Create New Product"
+                    : "Preview Product"}
           </h1>
           <p className="text-gray-600">
             {currentStep === "channel-select"
               ? "Select the sales channel where you want to publish your product"
               : currentStep === "product-choice"
-              ? "Choose how you want to add your product"
-              : currentStep === "upload"
-              ? "Select an existing product to upload"
-              : currentStep === "create"
-              ? "Create a new product with color variants"
-              : "Review your product before publishing"}
+                ? "Choose how you want to add your product"
+                : currentStep === "upload"
+                  ? "Select an existing product to upload"
+                  : currentStep === "create"
+                    ? "Create a new product with color variants"
+                    : "Review your product before publishing"}
           </p>
         </div>
 
@@ -637,14 +637,13 @@ const ProductCreationFlow = () => {
             (currentStep === "upload" && !productData.selectedProduct) ||
             (currentStep === "preview" && !productData.name)
           }
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-            (currentStep === "channel-select" &&
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${(currentStep === "channel-select" &&
               productData.selectedChannels.length > 0) ||
-            (currentStep === "upload" && productData.selectedProduct) ||
-            (currentStep === "preview" && productData.name)
+              (currentStep === "upload" && productData.selectedProduct) ||
+              (currentStep === "preview" && productData.name)
               ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          }`}
+            }`}
         >
           <span>{currentStep === "preview" ? "Publish Product" : "Next"}</span>
           <ChevronRight className="w-5 h-5" />
