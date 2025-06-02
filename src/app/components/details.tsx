@@ -135,7 +135,7 @@ const Details: React.FC<DetailsProps> = ({ data, onChange, onNext, onBack }) => 
 
           console.log(`Generate response for color ${color}:`, generateRes.data)
 
-          const { text, imageUrl } = generateRes.data
+          const { imageUrl } = generateRes.data
 
           colorVariants.push({
             hexCode: color,
@@ -326,8 +326,8 @@ const Details: React.FC<DetailsProps> = ({ data, onChange, onNext, onBack }) => 
             type="submit"
             disabled={!data.baseImage || selectedColors.length === 0 || isGenerating}
             className={`px-4 py-2 rounded-lg ${data.baseImage && selectedColors.length > 0 && !isGenerating
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
               }`}
           >
             {isGenerating

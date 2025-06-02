@@ -5,7 +5,6 @@ import Colors from "./colors";
 import Preview from "./preview";
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Manager from "./manager";
-import Image from "next/image";
 
 export interface ProductData {
   name: string;

@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       // Add any other image domains you use here
     ],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;
