@@ -57,8 +57,9 @@ export async function POST(req: NextRequest) {
 
         // Use Buffer directly instead of Blob (Node.js environment)
         const imageBuffer = Buffer.from(generatedImageBase64, "base64");
+        const _file = new File([imageBuffer], "generated-image.jpg", { type: "image/jpeg" });
 
-        const uploadResult = await uploadFileToPixelbin(imageBuffer, {
+        const uploadResult = await uploadFileToPixelbin(_file, {
             path: "generated",
             filename: "generated-image.jpg",
             format: "jpeg",
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
             imageUrl: uploadResult.url,
             metadata: uploadResult.metadata,
         });
-    } catch (error: unknown) {
+    } catch (error: any) {
         console.error("Image generation failed:", error);
         return NextResponse.json({ error: error.message || "Failed to generate images" }, { status: 500 });
     }

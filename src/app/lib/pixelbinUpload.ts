@@ -25,6 +25,7 @@ export async function uploadFileToPixelbin(file: File, options?: {
     overwrite?: boolean;
     filenameOverride?: boolean;
     expiry?: number;
+    filename?: string;
 }) {
     if (!file) throw new Error("No file provided");
 
@@ -69,7 +70,7 @@ export async function uploadFileToPixelbin(file: File, options?: {
             const partNumber = index + 1;
             const uploadUrl = `${url}&partNumber=${partNumber}`;
 
-            const form = new FormData();
+            const form: any = new FormData();
             form.append("x-pixb-meta-assetdata", uploadId);
             form.append("file", new Blob([partBuffer]), file.name);
 
