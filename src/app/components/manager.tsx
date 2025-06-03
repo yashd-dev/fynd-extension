@@ -43,7 +43,7 @@ const Manager: React.FC<ManagerProps> = ({
   // Update parent component when selected variants change
   useEffect(() => {
     onColorVariantsChange(selectedVariants);
-  }, [selectedVariants, onColorVariantsChange]);
+  }, [selectedVariants]);
 
   const handleAddColor = async () => {
     setIsLoading(true);
@@ -360,8 +360,8 @@ const Manager: React.FC<ManagerProps> = ({
           onClick={onNext}
           disabled={selectedVariants.length === 0 || isLoading}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${selectedVariants.length > 0 && !isLoading
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            ? "bg-blue-600 text-white hover:bg-blue-700"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
         >
           <span>Next</span>
