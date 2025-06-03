@@ -26,7 +26,8 @@ export default function AuthPageContent() {
 
           if (res.ok) {
             localStorage.setItem("fynd_access_token", data.access_token)
-            router.push("/")
+            localStorage.setItem("fynd_company_id", company_id)
+            router.push("/products")
           } else {
             console.error("Token exchange failed:", data)
           }
