@@ -1,3 +1,3 @@
-# Naish
+# HueBot
 
-Naish is a product variation generator extension for Fynd.
+HueBot is a product variation generator extension for Fynd.

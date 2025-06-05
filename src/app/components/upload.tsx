@@ -35,7 +35,7 @@ const ImageUpload: React.FC<ProductImageUploadProps> = ({
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         onImageUpload(result.imageUrl);
       } else {
@@ -90,9 +90,8 @@ const ImageUpload: React.FC<ProductImageUploadProps> = ({
       </p>
 
       <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center ${
-          isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
-        } ${isUploading ? "opacity-50" : ""}`}
+        className={`border-2 border-dashed rounded-lg p-8 text-center ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
+          } ${isUploading ? "opacity-50" : ""}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -102,7 +101,7 @@ const ImageUpload: React.FC<ProductImageUploadProps> = ({
         ) : (
           <UploadIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
         )}
-        
+
         {isUploading ? (
           <p className="text-blue-600 mb-2">Uploading image...</p>
         ) : (

@@ -46,6 +46,7 @@ const Manager: React.FC<ManagerProps> = ({
   }, [selectedVariants]);
 
   const handleAddColor = async () => {
+    console.log("Adding color:", newColor);
     setIsLoading(true);
     try {
       // Convert product image to blob and file
@@ -86,16 +87,14 @@ const Manager: React.FC<ManagerProps> = ({
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      console.log(`Generate response for color ${newColor}:`, generateRes.data);
+      console.log(`Generated response for color ${newColor}:`, generateRes.data);
 
-      const { text, imageBase64 } = generateRes.data;
+      const { imageUrl } = generateRes.data;
 
       const newVariant: ColorVariant = {
         hexCode: newColor,
-        image: uploadedUrl,
+        image: imageUrl,
         isApproved: false,
-        generatedText: text,
-        generatedImageBase64: imageBase64,
       };
 
       setGeneratedVariants((prev) => [...prev, newVariant]);

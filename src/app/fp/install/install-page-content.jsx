@@ -10,7 +10,7 @@ const InstallPageContent = () => {
   useEffect(() => {
     const company_id = searchParams.get("company_id")
     const cluster_url = searchParams.get("cluster_url")
-    const client_id = process.env.NEXT_PUBLIC_NAISH_API_KEY
+    const client_id = process.env.NEXT_PUBLIC_HUEBOT_API_KEY
 
     if (typeof company_id === "string" && typeof cluster_url === "string" && typeof client_id === "string") {
       const redirect_uri = `${process.env.NEXT_PUBLIC_REDIRECT_URI}/fp/auth` // Typically ends with /fp/auth

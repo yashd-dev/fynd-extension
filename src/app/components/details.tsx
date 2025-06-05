@@ -86,8 +86,9 @@ const Details: React.FC<DetailsProps> = ({ data, onChange, onNext, onBack }) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!data.baseImage || selectedColors.length === 0) return
+    console.log("Submitting product details...")
+    console.log("Selected colors:", selectedColors)
+    if (!data.baseImage || selectedColors.length === 0) console.warn("No image or colors selected")
 
     setIsGenerating(true)
 

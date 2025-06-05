@@ -305,8 +305,8 @@ const Colors: React.FC<ColorsProps> = ({
             onClick={handleNext}
             disabled={approvedVariants.length === 0}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${approvedVariants.length > 0
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
               }`}
           >
             <span>Next</span>
